@@ -2,21 +2,48 @@
   "name": "tadabor",
   "version": "1.0.0",
   "main": "index.ts",
-  "dependencies": {
-    "expo": "~57.0.20",
-    "expo-status-bar": "~57.0.1",
-    "react": "19.2.3",
-    "react-native": "0.86.3"
-  },
-  "devDependencies": {
-    "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
-  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
+  },
+  "dependencies": {
+    "@expo-google-fonts/inter": "*",
+    "@expo-google-fonts/noto-naskh-arabic": "*",
+    "@expo/metro-runtime": "~57.0.15",
+    "@expo/vector-icons": "^14.0.0",
+    "@react-native-async-storage/async-storage": "^2.1.2",
+    "expo": "~57.0.20",
+    "expo-asset": "~11.1.6",
+    "expo-constants": "~17.1.6",
+    "expo-font": "~13.3.2",
+    "expo-haptics": "~14.1.4",
+    "expo-linking": "~7.1.5",
+    "expo-location": "~18.1.5",
+    "expo-modules-core": "~57.0.16",
+    "expo-notifications": "~0.31.2",
+    "expo-router": "~57.0.19",
+    "expo-secure-store": "~14.2.0",
+    "expo-splash-screen": "~0.30.9",
+    "expo-status-bar": "~2.2.3",
+    "nativewind": "^4.1.23",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.5",
+    "react-native-gesture-handler": "~2.24.0",
+    "react-native-reanimated": "~3.17.4",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.10.0",
+    "react-native-svg": "^15.15.5",
+    "react-native-web": "~0.20.0",
+    "tailwindcss": "^3.4.17",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.12",
+    "babel-preset-expo": "~13.0.0",
+    "typescript": "~5.8.3"
   },
   "private": true
 }
