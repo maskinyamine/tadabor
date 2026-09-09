@@ -15,15 +15,13 @@ function getGreeting(): { ar: string; fr: string; period: 'morning' | 'afternoon
   return { ar: 'السلام عليكم', fr: 'Assalamu Alaykom', period: 'evening' };
 }
 
-function getHijriDate(): string {
-  // Simple approximation; will be replaced by a proper Hijri lib or API later
+function getFallbackGregorian(): string {
   try {
-    const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+    return new Intl.DateTimeFormat('fr-FR', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-    });
-    return formatter.format(new Date());
+    }).format(new Date());
   } catch {
     return '';
   }
@@ -86,52 +84,102 @@ function QuickCard({ icon, iconLib = 'ionicons', titleAr, titleFr, subtitle, acc
   );
 }
 
-// ─── prayer countdown banner ─────────────────────────────────────────────────
+// ─── prayer widget (replaces banner & action card) ───────────────────────────
 
-function PrayerBanner() {
-  const { nextPrayer, timeLeft } = usePrayerStore();
+function PrayerWidget() {
+  const router = useRouter();
+  const { prayers, nextPrayer, timeLeft, hijriDate } = usePrayerStore();
 
-  if (!nextPrayer) {
+  if (!nextPrayer || prayers.length === 0) {
     return (
-      <View
-        className="rounded-3xl p-5 mb-4 items-center justify-center"
-        style={{ backgroundColor: '#1A3C34', overflow: 'hidden', height: 100 }}
+      <TouchableOpacity
+        onPress={() => router.push('/(tabs)/prayer')}
+        activeOpacity={0.9}
+        className="bg-white rounded-[28px] p-5 mb-5 items-center justify-center"
+        style={{ height: 140, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 4 }}
       >
-        <MosaicBackground opacity={0.07} />
-        <Text style={{ fontFamily: 'Inter_400Regular', color: '#9FBFB6' }}>
-          Chargement des horaires...
-        </Text>
-      </View>
+        <Text style={{ fontFamily: 'Inter_400Regular', color: '#9CA3AF' }}>Chargement des horaires...</Text>
+      </TouchableOpacity>
     );
   }
 
+  // Extract day and month from hijriDate: "29 صفر 1446" -> "29", "صفر"
+  const hijriParts = hijriDate.split(' ');
+  const hDay = hijriParts[0] || '';
+  const hMonth = hijriParts.slice(1, -1).join(' ') || '';
+
   return (
-    <View
-      className="rounded-3xl p-5 mb-4"
-      style={{ backgroundColor: '#1A3C34', overflow: 'hidden' }}
-    >
-      <MosaicBackground opacity={0.07} />
-      <View className="flex-row items-center justify-between">
-        <View>
-          <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 11, color: '#9FBFB6' }}>
-            Prochaine prière
-          </Text>
-          <Text style={{ fontFamily: 'NotoNaskhArabic_700Bold', fontSize: 22, color: '#FFFFFF' }}>
-            {nextPrayer.nameAr}
-          </Text>
-          <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 13, color: '#C5D9D3' }}>
-            {nextPrayer.nameFr}
-          </Text>
-        </View>
-        <View className="items-end">
-          <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 34, color: '#C9A84C', letterSpacing: 1 }}>
-            {nextPrayer.time}
-          </Text>
-          <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 11, color: '#9FBFB6' }}>
-            dans {timeLeft}
-          </Text>
-        </View>
+    <View className="mb-5">
+      {/* Title Bar */}
+      <View className="flex-row justify-between items-center mb-2 px-1">
+        <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 20, color: '#1A1A1A' }}>
+          Horaires de Prière
+        </Text>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/prayer')} className="flex-row items-center">
+          <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#2D6A55' }}>Plus </Text>
+          <Ionicons name="chevron-forward" size={13} color="#2D6A55" />
+        </TouchableOpacity>
       </View>
+
+      {/* Main Card */}
+      <TouchableOpacity
+        activeOpacity={0.95}
+        onPress={() => router.push('/(tabs)/prayer')}
+        className="bg-white rounded-[28px] p-5 pt-6"
+        style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 4 }}
+      >
+        {/* Top Info */}
+        <View className="flex-row justify-between items-center mb-6">
+          <View className="flex-row items-center">
+            <View>
+              <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 18, color: '#2D6A55' }}>
+                {nextPrayer.nameFr}
+              </Text>
+              <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#1A1A1A' }}>
+                {nextPrayer.time}
+              </Text>
+            </View>
+            <View className="w-[2px] h-12 bg-[#E5E7EB] mx-4 rounded-full" />
+            <View className="justify-center">
+              <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 18, color: '#2D6A55' }}>
+                {hDay}
+              </Text>
+              <Text style={{ fontFamily: 'NotoNaskhArabic_400Regular', fontSize: 12, color: '#1A1A1A' }}>
+                {hMonth}
+              </Text>
+            </View>
+          </View>
+          <View className="items-end justify-center">
+            <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#1A1A1A' }}>
+              Dans
+            </Text>
+            <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 18, color: '#2D6A55' }}>
+              {timeLeft}
+            </Text>
+          </View>
+        </View>
+
+        {/* Timeline */}
+        <View className="flex-row justify-between items-center">
+          {prayers.map((prayer) => {
+            const isActive = prayer.key === nextPrayer.key;
+            return (
+              <View 
+                key={prayer.key} 
+                className={`items-center rounded-xl py-2 px-1 flex-1 mx-0.5 ${isActive ? 'bg-[#2D6A55]' : 'bg-transparent'}`}
+                style={isActive ? { shadowColor: '#2D6A55', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 } : {}}
+              >
+                <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 11, color: isActive ? '#FFFFFF' : '#1A1A1A', marginBottom: 2 }} numberOfLines={1}>
+                  {prayer.nameFr}
+                </Text>
+                <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 11, color: isActive ? '#FFFFFF' : '#1A1A1A' }}>
+                  {prayer.time}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -141,9 +189,8 @@ function PrayerBanner() {
 export default function HomeScreen() {
   const router = useRouter();
   const greeting = useMemo(() => getGreeting(), []);
-  const hijri = useMemo(() => getHijriDate(), []);
 
-  const { fetchPrayers, updateTimeLeft } = usePrayerStore();
+  const { fetchPrayers, updateTimeLeft, hijriDate } = usePrayerStore();
 
   useEffect(() => {
     fetchPrayers();
@@ -152,6 +199,8 @@ export default function HomeScreen() {
     }, 60000);
     return () => clearInterval(interval);
   }, [fetchPrayers, updateTimeLeft]);
+
+  const displayGregorian = getFallbackGregorian();
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: '#F7F9F7' }}>
@@ -190,24 +239,23 @@ export default function HomeScreen() {
               {greeting.fr}
             </Text>
           </View>
-
-          {/* Hijri date */}
-          {hijri ? (
-            <View className="items-center">
-              <View className="px-3 py-1 rounded-full" style={{ backgroundColor: '#C9A84C22' }}>
-                <Text style={{ fontFamily: 'NotoNaskhArabic_400Regular', fontSize: 14, color: '#C9A84C' }}>
-                  {hijri}
-                </Text>
-              </View>
+          {/* Hijri & Miladi date */}
+          <View className="items-center">
+            <View className="px-3 py-1.5 rounded-full" style={{ backgroundColor: '#C9A84C22', flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 12, color: '#C9A84C', paddingRight: 8, borderRightWidth: 1, borderRightColor: '#C9A84C44' }}>
+                {displayGregorian}
+              </Text>
+              <Text style={{ fontFamily: 'NotoNaskhArabic_400Regular', fontSize: 14, color: '#C9A84C', paddingLeft: 8 }}>
+                {hijriDate || '...'}
+              </Text>
             </View>
-          ) : null}
+          </View>
         </View>
-
-        {/* ── Prayer Banner ── */}
-        <PrayerBanner />
+        {/* ── Prayer Widget ── */}
+        <PrayerWidget />
 
         {/* ── Section title ── */}
-        <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center justify-between mb-3 mt-2">
           <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#6B7280' }}>
             AUJOURD'HUI
           </Text>

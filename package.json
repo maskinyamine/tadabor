@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/amiri": "^0.4.1",
     "@expo-google-fonts/inter": "*",
     "@expo-google-fonts/noto-naskh-arabic": "*",
     "@expo/metro-runtime": "~57.0.15",

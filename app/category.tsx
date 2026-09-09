@@ -1,34 +1,15 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { MosaicBackground } from '@/components/ui/MosaicBackground';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useMemo } from 'react';
-import azkarData from '../../azkar.json';
+import azkarData from '../azkar.json';
 
-// ─── New JSON format: array of { id, category, array: [{id, text, count}] } ──
-
+// ─── New JSON format ──────────────────────────────────────────────────────────
 type AzkarEntry = { id: number; text: string; count: number; audio?: string };
 type AzkarGroup = { id: number; category: string; array: AzkarEntry[] };
 
-// ─── 4 main categories shown in the Athkar tab ───────────────────────────────
-
-const MAIN_CATEGORIES = [
-  'أذكار الصباح والمساء',
-  'أذكار النوم',
-  'أذكار الاستيقاظ من النوم',
-  'الأذكار بعد السلام من الصلاة',
-];
-
-// Map tab label → category name in JSON
-const SESSION_TABS = [
-  { id: 'أذكار الصباح والمساء',           label: 'الصباح والمساء' },
-  { id: 'أذكار النوم',                    label: 'النوم' },
-  { id: 'أذكار الاستيقاظ من النوم',        label: 'الاستيقاظ' },
-  { id: 'الأذكار بعد السلام من الصلاة',   label: 'بعد الصلاة' },
-];
-
 // ─── Dhikr card ──────────────────────────────────────────────────────────────
-
 type DhikrCardProps = {
   entry: AzkarEntry;
   cardKey: string;
@@ -54,11 +35,9 @@ function DhikrCard({ entry, cardKey, current, onTap }: DhikrCardProps) {
         opacity: done ? 0.6 : 1,
       }}
     >
-      {/* Top strip */}
       <View className="h-1 w-full" style={{ backgroundColor: done ? '#22C55E' : '#1A3C34' }} />
 
       <View className="p-5">
-        {/* Arabic text */}
         <Text
           style={{
             fontFamily: 'NotoNaskhArabic_400Regular',
@@ -72,12 +51,10 @@ function DhikrCard({ entry, cardKey, current, onTap }: DhikrCardProps) {
           {entry.text}
         </Text>
 
-        {/* Footer */}
         <View className="flex-row items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 11, color: '#9CA3AF' }}>
             {entry.count > 1 ? `يُكرَّر ${entry.count} مرة` : 'مرة واحدة'}
           </Text>
-
           <View className="flex-row items-center gap-2">
             <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 12, color: done ? '#22C55E' : '#1A3C34' }}>
               {current} / {entry.count}
@@ -98,28 +75,24 @@ function DhikrCard({ entry, cardKey, current, onTap }: DhikrCardProps) {
   );
 }
 
-// ─── Main screen ─────────────────────────────────────────────────────────────
+// ─── Main screen ──────────────────────────────────────────────────────────────
 
-export default function AthkarScreen() {
-  const [session, setSession] = useState<string>(SESSION_TABS[0].id);
+export default function CategoryScreen() {
+  const router = useRouter();
+  const { name } = useLocalSearchParams<{ name: string }>();
   const [counters, setCounters] = useState<Record<string, number>>({});
 
   const allGroups = azkarData as AzkarGroup[];
 
-  // Find entries for the current session from the new array format
   const entries: AzkarEntry[] = useMemo(() => {
-    const group = allGroups.find((g) => g.category === session);
+    if (!name) return [];
+    const group = allGroups.find((g) => g.category === name);
     if (!group) return [];
     return (group.array || []).filter((e) => e.text && e.text.trim() !== '');
-  }, [session]);
+  }, [name]);
 
-  const completed = entries.filter((e) => (counters[`${session}-${e.id}`] ?? 0) >= e.count).length;
+  const completed = entries.filter((e) => (counters[`${name}-${e.id}`] ?? 0) >= e.count).length;
   const progressPercent = entries.length > 0 ? Math.round((completed / entries.length) * 100) : 0;
-
-  function switchSession(id: string) {
-    setSession(id);
-    setCounters({});
-  }
 
   function tap(key: string, max: number) {
     setCounters((prev) => {
@@ -131,49 +104,22 @@ export default function AthkarScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: '#F7F9F7' }}>
-      {/* ── Header ── */}
-      <View className="px-5 pt-2 pb-4" style={{ backgroundColor: '#1A3C34', overflow: 'hidden' }}>
-        <MosaicBackground opacity={0.09} />
-        <View className="flex-row items-center justify-between mb-4">
-          <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#9FBFB6' }}>
-            {completed} / {entries.length} complétés
-          </Text>
-          <Text style={{ fontFamily: 'NotoNaskhArabic_700Bold', fontSize: 22, color: '#FFFFFF' }}>
-            الأذكار
-          </Text>
-        </View>
-
-        {/* Session toggle — horizontal scroll for longer labels */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row rounded-2xl p-1 gap-1" style={{ backgroundColor: '#152520' }}>
-            {SESSION_TABS.map((tab) => (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => switchSession(tab.id)}
-                className="py-2 px-3 rounded-xl items-center"
-                style={{ backgroundColor: session === tab.id ? '#C9A84C' : 'transparent' }}
-              >
-                <Text
-                  style={{
-                    fontFamily: 'NotoNaskhArabic_700Bold',
-                    fontSize: 13,
-                    color: session === tab.id ? '#1A3C34' : '#9FBFB6',
-                  }}
-                >
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
-
-        {/* Progress bar */}
-        <View className="mt-3 h-1 rounded-full" style={{ backgroundColor: '#2D6A55' }}>
-          <View className="h-1 rounded-full" style={{ backgroundColor: '#C9A84C', width: `${progressPercent}%` }} />
-        </View>
+      {/* Header */}
+      <View className="px-5 py-4 bg-white border-b border-gray-100 flex-row items-center">
+        <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 items-center justify-center rounded-full bg-gray-50 mr-3">
+          <Ionicons name="chevron-back" size={24} color="#1A3C34" />
+        </TouchableOpacity>
+        <Text style={{ fontFamily: 'NotoNaskhArabic_700Bold', fontSize: 18, color: '#1A3C34', flex: 1, textAlign: 'right' }} numberOfLines={1}>
+          {name}
+        </Text>
       </View>
 
-      {/* ── List ── */}
+      {/* Progress bar */}
+      <View className="h-1 bg-gray-200">
+        <View className="h-full" style={{ backgroundColor: '#22C55E', width: `${progressPercent}%` }} />
+      </View>
+
+      {/* List */}
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
@@ -181,11 +127,11 @@ export default function AthkarScreen() {
       >
         {entries.length === 0 ? (
           <Text style={{ fontFamily: 'Inter_400Regular', color: '#9CA3AF', textAlign: 'center', marginTop: 40 }}>
-            Aucun dhikr trouvé.
+            Aucun contenu trouvé pour "{name}".
           </Text>
         ) : (
           entries.map((entry) => {
-            const key = `${session}-${entry.id}`;
+            const key = `${name}-${entry.id}`;
             return (
               <DhikrCard
                 key={key}

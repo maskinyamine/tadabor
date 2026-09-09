@@ -14,6 +14,8 @@ interface PrayerState {
   prayers: PrayerItem[];
   city: string;
   country: string;
+  hijriDate: string;
+  gregorianDate: string;
   isLoading: boolean;
   isFetching: boolean;
   error: string | null;
@@ -41,9 +43,10 @@ const DEFAULT_LON = 2.3522;
 const DEFAULT_CITY = 'Paris';
 const DEFAULT_COUNTRY = 'France';
 
-const PRAYER_KEYS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+const PRAYER_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const PRAYER_NAMES_AR: Record<string, string> = {
   Fajr: 'الفجر',
+  Sunrise: 'الشروق',
   Dhuhr: 'الظهر',
   Asr: 'العصر',
   Maghrib: 'المغرب',
@@ -51,6 +54,7 @@ const PRAYER_NAMES_AR: Record<string, string> = {
 };
 const PRAYER_NAMES_FR: Record<string, string> = {
   Fajr: 'Fajr',
+  Sunrise: 'Sunrise',
   Dhuhr: 'Dhuhr',
   Asr: 'Asr',
   Maghrib: 'Maghrib',
@@ -61,6 +65,8 @@ export const usePrayerStore = create<PrayerState>((set, get) => ({
   prayers: [],
   city: '',
   country: '',
+  hijriDate: '',
+  gregorianDate: '',
   isLoading: true,
   isFetching: false,
   error: null,
@@ -80,6 +86,8 @@ export const usePrayerStore = create<PrayerState>((set, get) => ({
 
       const { status } = await Location.requestForegroundPermissionsAsync();
       
+      let locationFetched = false;
+
       if (status === 'granted') {
         try {
           const location = await Location.getCurrentPositionAsync({});
@@ -95,12 +103,32 @@ export const usePrayerStore = create<PrayerState>((set, get) => ({
           if (geocode && geocode.length > 0) {
             city = geocode[0].city || geocode[0].subregion || geocode[0].region || DEFAULT_CITY;
             country = geocode[0].country || DEFAULT_COUNTRY;
+            locationFetched = true;
           }
         } catch (locationError) {
-          console.warn("Could not fetch location, falling back to default.", locationError);
+          console.warn("Could not fetch GPS location, trying IP fallback.", locationError);
         }
       } else {
-        console.warn("Location permission denied, using default location.");
+        console.warn("Location permission denied, trying IP fallback.");
+      }
+
+      // ── IP-based fallback if GPS failed or denied ──
+      if (!locationFetched) {
+        try {
+          const ipRes = await fetch('http://ip-api.com/json/');
+          if (ipRes.ok) {
+            const ipData = await ipRes.json();
+            if (ipData && ipData.lat && ipData.lon) {
+              lat = ipData.lat;
+              lon = ipData.lon;
+              city = ipData.city || ipData.regionName || DEFAULT_CITY;
+              country = ipData.country || DEFAULT_COUNTRY;
+              locationFetched = true;
+            }
+          }
+        } catch (ipError) {
+          console.warn("IP location fallback failed, using default Paris.", ipError);
+        }
       }
 
       set({ city, country });
@@ -119,6 +147,11 @@ export const usePrayerStore = create<PrayerState>((set, get) => ({
 
       const data = await response.json();
       const timings = data.data.timings;
+      const apiDate = data.data.date;
+
+      // Format Hijri and Gregorian dates from API
+      const hijriDate = `${apiDate.hijri.day} ${apiDate.hijri.month.ar} ${apiDate.hijri.year}`;
+      const gregorianDate = `${apiDate.gregorian.day} ${apiDate.gregorian.month.en} ${apiDate.gregorian.year}`;
 
       const basePrayers: PrayerItem[] = PRAYER_KEYS.map((key) => ({
         key: key.toLowerCase(),
@@ -129,7 +162,7 @@ export const usePrayerStore = create<PrayerState>((set, get) => ({
         next: false,
       }));
 
-      set({ prayers: basePrayers });
+      set({ prayers: basePrayers, hijriDate, gregorianDate });
       
       // Compute done, next, and time left
       get().updateTimeLeft();

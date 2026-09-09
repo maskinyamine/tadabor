@@ -15,6 +15,10 @@ import {
   NotoNaskhArabic_400Regular,
   NotoNaskhArabic_700Bold,
 } from '@expo-google-fonts/noto-naskh-arabic';
+import {
+  Amiri_400Regular,
+  Amiri_700Bold,
+} from '@expo-google-fonts/amiri';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
@@ -27,6 +31,8 @@ export default function RootLayout() {
     Inter_700Bold,
     NotoNaskhArabic_400Regular,
     NotoNaskhArabic_700Bold,
+    Amiri_400Regular,
+    Amiri_700Bold,
     TheYearOfCamel: require('../assets/fonts/TheYearOfCamel.ttf'),
   });
 

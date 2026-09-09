@@ -66,16 +66,28 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="athkar"
         options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="tools"
+        options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="sparkles-outline" focused={focused} label="أذكار" />
+            <TabIcon name="apps-outline" focused={focused} label="أخرى" />
           ),
         }}
       />
       <Tabs.Screen
         name="prayer"
         options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="quran"
+        options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="time-outline" focused={focused} label="الصلاة" />
+            <TabIcon name="book-outline" focused={focused} label="القرآن" />
           ),
         }}
       />
@@ -83,7 +95,7 @@ export default function TabsLayout() {
         name="hadith"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="book-outline" focused={focused} label="حديث" />
+            <TabIcon name="library-outline" focused={focused} label="حديث" />
           ),
         }}
       />
