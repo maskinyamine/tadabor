@@ -164,8 +164,8 @@ function PrayerWidget() {
           {prayers.map((prayer) => {
             const isActive = prayer.key === nextPrayer.key;
             return (
-              <View 
-                key={prayer.key} 
+              <View
+                key={prayer.key}
                 className={`items-center rounded-xl py-2 px-1 flex-1 mx-0.5 ${isActive ? 'bg-[#2D6A55]' : 'bg-transparent'}`}
                 style={isActive ? { shadowColor: '#2D6A55', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 } : {}}
               >
@@ -221,7 +221,7 @@ export default function HomeScreen() {
               <Ionicons name="settings-outline" size={18} color="#C9A84C" />
             </TouchableOpacity>
             <View className="items-center">
-              <Text style={{ fontFamily: 'TheYearOfCamel', fontSize: 22, color: '#FFFFFF', letterSpacing: 0.5, paddingTop: 4 }}>
+              <Text style={{ fontFamily: 'TheYearOfCamel', fontSize: 22, color: '#C9A84C', letterSpacing: 0.5, paddingTop: 4 }}>
                 Tadabor
               </Text>
             </View>

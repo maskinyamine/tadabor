@@ -213,7 +213,7 @@ export default function TasbihScreen() {
         {/* Progress text */}
         <View className="mt-6 items-center">
           <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 13, color: '#6B7280' }}>
-            {done ? '🎉 Objectif atteint !' : `${goal - count} restants`}
+            {done ? 'تقبل الله ' : `${goal - count} restants`}
           </Text>
           {done && (
             <TouchableOpacity onPress={reset} className="mt-3 px-6 py-2.5 rounded-full" style={{ backgroundColor: '#1A3C34' }}>

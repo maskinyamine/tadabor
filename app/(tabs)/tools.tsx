@@ -248,7 +248,7 @@ export default function ToolsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Athkar card (main page) ── */}
-        <View className="mt-4 mb-2">
+        <View className="mt-4 mb-3">
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/athkar')}
             activeOpacity={0.8}
@@ -268,6 +268,31 @@ export default function ToolsScreen() {
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#C9A84C" />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Sirah & Sahaba card ── */}
+        <View className="mb-2">
+          <TouchableOpacity
+            onPress={() => router.push('/sirah')}
+            activeOpacity={0.8}
+            className="rounded-3xl overflow-hidden bg-white border border-gray-100"
+            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
+          >
+            <View className="p-4 flex-row items-center justify-between">
+              <View className="w-12 h-12 rounded-2xl items-center justify-center" style={{ backgroundColor: '#2D6A5515' }}>
+                <Ionicons name="moon-outline" size={24} color="#2D6A55" />
+              </View>
+              <View className="flex-1 mx-3">
+                <Text style={{ fontFamily: 'NotoNaskhArabic_700Bold', fontSize: 17, color: '#1A3C34' }}>
+                  السيرة النبوية والصحابة
+                </Text>
+                <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+                  Sirah & Sahaba · 6 sections
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </View>
           </TouchableOpacity>
         </View>

@@ -232,7 +232,7 @@ export default function QuranScreen() {
               className="w-10 h-10 rounded-full items-center justify-center"
               style={{ backgroundColor: '#FFFFFF18' }}
             >
-              <Ionicons name="chevron-back" size={22} color="#ffffffa8" />
+              <Ionicons name="chevron-back" size={22} color="#ffffffd9" />
             </TouchableOpacity>
             <View className="items-center flex-1 mx-2">
               <Text style={{ fontFamily: 'NotoNaskhArabic_700Bold', fontSize: 22, color: '#FFFFFF' }}>
@@ -289,22 +289,22 @@ export default function QuranScreen() {
 
               {/* Inline Verses */}
               <Text style={{ textAlign: 'center', writingDirection: 'rtl', lineHeight: 65 }}>
-                {verses.map(v => (
-                  <Text
-                    key={v.number}
-                    onPress={() => setSelectedAyah(v.numberInSurah)}
-                    style={{
-                      backgroundColor: selectedAyah === v.numberInSurah ? '#EEDFBA' : 'transparent',
-                    }}
-                  >
-                    <Text style={{ fontFamily: 'Amiri_400Regular', fontSize: 28, color: '#1A3C34' }}>
-                      {v.text}{' '}
+                {verses.map(v => {
+                  const isSelected = selectedAyah === v.numberInSurah;
+                  return (
+                    <Text
+                      key={v.number}
+                      onPress={() => setSelectedAyah(v.numberInSurah)}
+                    >
+                      <Text style={{ fontFamily: 'Amiri_400Regular', fontSize: 28, color: isSelected ? '#C9A84C' : '#1A3C34' }}>
+                        {v.text}{' '}
+                      </Text>
+                      <Text style={{ fontFamily: 'Amiri_400Regular', fontSize: 22, color: isSelected ? '#1A3C34' : '#C9A84C' }}>
+                        ۝{toArabicNumber(v.numberInSurah)}{' '}
+                      </Text>
                     </Text>
-                    <Text style={{ fontFamily: 'Amiri_400Regular', fontSize: 22, color: '#C9A84C' }}>
-                      ۝{toArabicNumber(v.numberInSurah)}{' '}
-                    </Text>
-                  </Text>
-                ))}
+                  );
+                })}
               </Text>
             </ScrollView>
 
